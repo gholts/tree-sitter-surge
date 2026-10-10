@@ -1,0 +1,383 @@
+==================
+Profile, references and nested predicates
+==================
+[General]
+ipv6 = false
+skip-proxy = 192.168.0.0/16, fc00::/7
+[Proxy Group]
+Home = subnet, default=DEVICE:MAC-MINI, "SSID:Zen"=DIRECT
+[Rule]
+AND,((PROTOCOL,STUN),(DOMAIN-SUFFIX,example.com)),Home,no-resolve
+FINAL,Home,dns-failed
+---
+
+(source_file
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (boolean))))
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (address))
+        (value
+          (address)))))
+  (group_section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (word))
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (attribute
+          (name
+            (string))
+          (value
+            (builtin))))))
+  (section
+    (section_header)
+    (rule
+      (word)
+      (logical_group
+        (predicate
+          (word)
+          (value
+            (word)))
+        (predicate
+          (word)
+          (value
+            (word))))
+      (value
+        (word))
+      (value
+        (word)))
+    (rule
+      (word)
+      (value
+        (word))
+      (value
+        (word)))))
+
+==================
+Modules, quoted commas and inline requirements
+==================
+#!name=Test Module
+#!arguments=hostname:example.com
+[MITM]
+hostname = %APPEND% {{{hostname}}}
+[Script]
+Script Name = type=generic, script-path=script.js, argument="a, b; // c"
+[Rule]
+DOMAIN,example.com,DIRECT #!REQUIREMENT DEVICE_MODEL!="Mac16,10"
+# DOMAIN,disabled.example,REJECT
+---
+
+(source_file
+  (directive
+    (directive_name)
+    (operator)
+    (word)
+    (word))
+  (directive
+    (directive_name)
+    (operator)
+    (word))
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (module_operator)
+          (parameter)))))
+  (named_section
+    (section_header)
+    (assignment
+      (name
+        (word)
+        (word))
+      (values
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (attribute
+          (name
+            (word))
+          (value
+            (string))))))
+  (section
+    (section_header)
+    (rule
+      (word)
+      (value
+        (word))
+      (value
+        (builtin)))
+    (inline_directive
+      (inline_directive_name)
+      (word)
+      (operator)
+      (string))
+    (comment)))
+
+==================
+Opaque data, includes and named sections
+==================
+[Keystore]
+mitm-ca = type = p12, base64 = MIIAAAAA/1234+BBBB==
+[Proxy]
+#!include Shared/Proxies.dconf, Shared/Utility.dconf
+香港 01 = http, example.com, 80
+[Tailscale Example]
+interactive-login = true
+---
+
+(source_file
+  (named_section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (base64_attribute
+          (word)
+          (base64_data)))))
+  (proxy_section
+    (section_header)
+    (directive
+      (directive_name)
+      (word)
+      (word))
+    (assignment
+      (name
+        (word)
+        (number))
+      (values
+        (value
+          (word))
+        (value
+          (word))
+        (value
+          (number)))))
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (boolean))))))
+
+==================
+Standalone and inline rule sets
+==================
+DOMAIN,example.com
+IP-CIDR,192.168.0.0/16,no-resolve
+[Ruleset Local]
+DOMAIN,local.example,extended-matching
+[Rule]
+RULE-SET,Local,Home
+---
+
+(source_file
+  (rule
+    (word)
+    (value
+      (word)))
+  (rule
+    (word)
+    (value
+      (address))
+    (value
+      (word)))
+  (ruleset_section
+    (section_header)
+    (rule
+      (word)
+      (value
+        (word))
+      (value
+        (word))))
+  (section
+    (section_header)
+    (rule
+      (word)
+      (value
+        (word))
+      (value
+        (word)))))
+
+==================
+Regex values, equals signs and section boundaries
+==================
+[Script]
+Test = type=http-request, pattern=[a-z]+/(a|b), script-path=test.js
+[Proxy]
+Example = http, [2001:db8::1], 443, password=abc==, username=a=b
+[URL Rewrite]
+^https://example.com/(.*)$ https://example.org/$1 302
+[General]
+internet-test-url = https://example.com/a?key=1&x=two#fragment
+---
+
+(source_file
+  (named_section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (attribute
+          (name
+            (word))
+          (value
+            (bracketed_value)
+            (word)
+            (parenthesized_value
+              (value
+                (word)))))
+        (attribute
+          (name
+            (word))
+          (value
+            (word))))))
+  (proxy_section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (word))
+        (value
+          (address))
+        (value
+          (number))
+        (attribute
+          (name
+            (word))
+          (value
+            (word)))
+        (attribute
+          (name
+            (word))
+          (value
+            (word)
+            (word))))))
+  (section
+    (section_header)
+    (bare_statement
+      (value
+        (word)
+        (parenthesized_value
+          (value
+            (word)))
+        (word)
+        (url)
+        (number))))
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (url))))))
+
+==================
+Parenthesized fields and encoded padding
+==================
+[WireGuard Office]
+private-key = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+self-ip = 10.20.0.2
+peer = (public-key = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=, allowed-ips = "10.20.0.0/24, 192.168.50.0/24", endpoint = [2001:db8::1]:51820)
+[MITM]
+ca-p12 = MIIAAAAA==
+[Proxy Group]
+Home = select, DIRECT
+---
+
+(source_file
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (word))))
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (address))))
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (parenthesized_value
+            (attribute
+              (name
+                (word))
+              (value
+                (word)))
+            (attribute
+              (name
+                (word))
+              (value
+                (string)))
+            (attribute
+              (name
+                (word))
+              (value
+                (address))))))))
+  (section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (word)))))
+  (group_section
+    (section_header)
+    (assignment
+      (name
+        (word))
+      (values
+        (value
+          (word))
+        (value
+          (builtin))))))

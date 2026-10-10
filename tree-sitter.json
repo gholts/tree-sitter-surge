@@ -1,0 +1,20 @@
+{
+  "grammars": [
+    {
+      "name": "surge",
+      "camelcase": "Surge",
+      "scope": "source.surge",
+      "path": ".",
+      "highlights": "queries/highlights.scm",
+      "file-types": ["conf", "dconf", "sgconf", "sgmodule", "list"]
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "description": "Tree-sitter grammar for Surge profiles, modules, and rule sets"
+  },
+  "bindings": {
+    "c": true
+  }
+}
